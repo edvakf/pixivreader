@@ -13,7 +13,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1.0</string>
 	<key>Chrome</key>
 	<dict/>
 	<key>Content</key>
@@ -42,5 +42,7 @@
 			<string>Some</string>
 		</dict>
 	</dict>
+	<key>Update Manifest URL</key>
+	<string>http://atsushi-takayama.com/pixivreader/update_safariextz.plist</string>
 </dict>
 </plist>
