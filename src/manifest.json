@@ -1,0 +1,16 @@
+{
+  "name": "pixivreader",
+  "content_scripts": [ {
+     "js": [ "pixivreader.js" ],
+     "matches": [ "http://www.pixiv.net/*" ],
+     "run_at": "document_start"
+  } ],
+  "icons": {
+    "24": "icons/icon24.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png"
+  },
+  "description": "pixiv enhancement",
+  "permissions": [ "http://www.pixiv.net/*" ],
+  "version": "0.0.1"
+}
