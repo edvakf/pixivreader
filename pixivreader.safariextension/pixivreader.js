@@ -5,6 +5,7 @@
 // @include     http://www.pixiv.net/new_illust.php*
 // @include     http://www.pixiv.net/search.php*
 // @include     http://www.pixiv.net/tags.php*
+// @include     http://www.pixiv.net/bookmark_new_illust.php*
 // @include     http://www.pixiv.net/ranking.php*
 // @include     http://www.pixiv.net/ranking_log.php*
 // @compatible  Opera, Chrome (as UserJS and extension), Safari (as extension)
@@ -32,22 +33,23 @@
 
 (function () {
   var debug = false;
+  var pathname = location.pathname;
   var mode = {
-    new_illust : (location.pathname.indexOf('/new_illust.php') === 0),
-    search : (location.pathname.indexOf('/search.php') === 0) || (location.pathname.indexOf('/tags.php') === 0),
-    ranking : (location.pathname.indexOf('/ranking.php') === 0) || (location.pathname.indexOf('/ranking_log.php') === 0),
+    new_illust : (pathname.indexOf('/new_illust.php') === 0),
+    search : (pathname.indexOf('/search.php') === 0) || (pathname.indexOf('/tags.php') === 0) || (pathname.indexOf('/bookmark_new_illust.php') === 0),
+    ranking : (pathname.indexOf('/ranking.php') === 0) || (pathname.indexOf('/ranking_log.php') === 0),
   };
 
   if (/http:\/\/www\.pixiv\.net\/(new_illust|search|tags|ranking(_log)?)\.php/.test(location.href)) {
     if (location.href.indexOf('pixivreader') >= 0) {
       document.documentElement.style.display = 'none';
-      if (document.readyState === 'loading') {
+      if (document.readyState !== 'complete') { // Opera 10.10 is 'interactive'->'complete', but Opera 10.5 and other browsers are 'loading'->'complete' (per spec)
         document.addEventListener('DOMContentLoaded', init, false);
       } else {
         init();
       }
     } else {
-      if (document.readyState === 'loading') {
+      if (document.readyState !== 'complete') {
         document.addEventListener('DOMContentLoaded', init_readerToggle, false);
       } else {
         init_readerToggle();
