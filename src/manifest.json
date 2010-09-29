@@ -12,5 +12,5 @@
   },
   "description": "pixiv enhancement",
   "permissions": [ "http://www.pixiv.net/*" ],
-  "version": "1.0.2"
+  "version": "1.0.3"
 }

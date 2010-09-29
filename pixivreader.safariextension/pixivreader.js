@@ -42,7 +42,7 @@
     ranking : (pathname.indexOf('/ranking.php') === 0) || (pathname.indexOf('/ranking_log.php') === 0),
   };
 
-  if (/http:\/\/www\.pixiv\.net\/(new_illust|search|tags|ranking(_log)?)\.php/.test(location.href)) {
+  if (/http:\/\/www\.pixiv\.net\/((bookmark_)?new_illust|search|tags|ranking(_log)?)\.php/.test(location.href)) {
     if (location.href.indexOf('pixivreader') >= 0) {
       document.documentElement.style.display = 'none';
       if (document.readyState !== 'complete') { // Opera 10.10 is 'interactive'->'complete', but Opera 10.5 and other browsers are 'loading'->'complete' (per spec)
