@@ -8,6 +8,8 @@
 // @include     http://www.pixiv.net/bookmark_new_illust.php*
 // @include     http://www.pixiv.net/ranking.php*
 // @include     http://www.pixiv.net/ranking_log.php*
+// @include     http://www.pixiv.net/bookmark.php*
+// @include     http://www.pixiv.net/bookmark_add.php*
 // @compatible  Opera, Chrome (as UserJS and extension), Safari (as extension)
 // @licence     Public Domain
 // ==/UserScript==
@@ -55,6 +57,8 @@
         init_readerToggle();
       }
     }
+  } else if (pathname.indexOf('/bookmark') === 0 && window.name.indexOf('pixivreader_bookmark_add_') === 0) {
+    window.parent.postMessage({name:window.name, message:'bookmark_success'}, 'http://www.pixiv.net');
   }
 
   function init() {
@@ -95,6 +99,7 @@
       '.pixivreader .shade {position:absolute; left:0; top:0; width: 100%; height: 100%; background-color: black; opacity: 0.5; z-index: 1000;}',
       '.pixivreader .bookmarker {position:absolute; z-index: 2000; background-color: white; width: 680px; height: 450px; margin-left: -340px; margin-top: -225px; left: 50%; top: 50%; }',
       '.pixivreader .bookmarker form {padding: 10px;}',
+      '.pixivreader .bookmarker iframe {position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background-color: white;}',
       // from pixiv.js (modified)
       '.pixivreader .bookmarker .bookmain_title{padding:4px;}',
       '.pixivreader .bookmarker .bookmain_title_img{text-align:left;}',
@@ -425,8 +430,9 @@
       if (Showcase.images.length === 0) return;
       window.open(Showcase.images[Showcase.pos].querySelector('h2 a').href);
     };
-    Showcase.scrollDown = function Showcase_scrollDown() {
-      rightcol.scrollTop += 150;
+    Showcase.scrollDown = function Showcase_scrollDown(px) {
+      if (!px) px = 150;
+      rightcol.scrollTop += px;
       if (Showcase.images.length === 0) return;
       var rect = Showcase.images[Showcase.images.length - 1].getBoundingClientRect();
       if (rect.bottom - rect.top > document.documentElement.clientHeight) {
@@ -436,8 +442,9 @@
       }
       Showcase.adjustFocus();
     };
-    Showcase.scrollUp = function Showcase_scrollDown() {
-      rightcol.scrollTop -= 150;
+    Showcase.scrollUp = function Showcase_scrollDown(px) {
+      if (!px) px = 150;
+      rightcol.scrollTop -= px;
       Showcase.adjustFocus();
     };
     Showcase.adjustFocus = function Showcase_adjustFocus() {
@@ -594,7 +601,36 @@
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
-            bm.innerHTML = xhr.responseText.match(/<form action="bookmark_add.php"[\S\s]*?<\/form>/);
+            bm.innerHTML = xhr.responseText.match(/<form[^>]*action="bookmark_add.php"[\S\s]*?<\/form>/);
+            bm.querySelector('form').addEventListener('submit', function onsubmit(e) {
+              e.preventDefault();
+              var form = e.target;
+              form.removeEventListener('submit', onsubmit, false);
+              var iframe = document.createElement('iframe');
+              iframe.className = 'bookmark_add';
+              document.querySelector('.pixivreader').appendChild(iframe);
+              iframe.name = 'pixivreader_bookmark_add_' + Math.floor(Math.random() * 100000);
+              form.target = iframe.name;
+              HTMLFormElement.prototype.submit.call(form); // form.submit() doesn't work here because there are <input name="submit">
+              var onmessage = function(e) {
+                if (e.origin !== 'http://www.pixiv.net' || e.data.name !== iframe.name || e.data.message !== 'bookmark_success') return;
+                window.removeEventListener('message', onmessage, false);
+                clearTimeout(timer);
+                iframe.parentNode.removeChild(iframe);
+                Showcase.finishBookmark();
+              };
+              var timer = setTimeout(function() {
+                window.removeEventListener('message', onmessage, false);
+                clearTimeout(timer);
+                iframe.parentNode.removeChild(iframe);
+                forEach(form.querySelectorAll('input[type="submit"]'), function(button) {
+                  button.disabled = true;
+                  button.value = '10秒間応答がありません';
+                });
+              }, 10000);
+              window.addEventListener('message', onmessage, false);
+            }, false);
+
             // focus on comment field
             setTimeout(function() {
               var comment = document.getElementById('comment');
@@ -659,8 +695,8 @@
       } else if (e.wheelDelta) { // IE
         var delta = e.wheelDelta/40;
       }
-      if (delta > 0) Showcase.scrollUp();
-      if (delta < 0) Showcase.scrollDown();
+      if (delta > 0) Showcase.scrollUp(75 * delta);
+      if (delta < 0) Showcase.scrollDown(-75 * delta);
     }, false);
   }
 
@@ -689,7 +725,7 @@
     box.style.zIndex = 10000;
     var href = location.href;
     href = href.indexOf('pixivreader') >= 0 ? 
-             href.replace(/([?&])pixivreader(&)?/, function($0, $1, $2) {return $1 === '?' ? '?' : $2 ? '&' : ''}) :
+             href.replace(/([?&])pixivreader(&)?/, function($0, $1, $2) {return $2 ? ($1 === '?' ? '?' : '&') : ''}) :
            href.indexOf('?') >= 0 ? 
              href.replace('?', '?pixivreader&') :
              href + '?pixivreader';
