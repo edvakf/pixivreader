@@ -191,7 +191,7 @@
         setTimeout(function() {
           Thumb.fetch(page, function(html) {
             var status = Thumb.addIllusts(html);
-            if (status.success && status.isnew && (status.allnew || dontStop) && page < maxpage) {
+            if (status.success && !status.empty && (status.allnew || dontStop) && page < maxpage) {
               recursive(page + 1);
             }
           });
@@ -200,6 +200,7 @@
       recursive(p);
     };
     Thumb.fetchNextPage = function Thumb_fetchNextPage() {
+      function no_op() {}; // no-op function
       if (mode.new_illust) {
         var page;
       } else {
@@ -207,14 +208,20 @@
         var page = m ? +m[1] : 1;
       }
       Thumb.fetchNextPage = function Thumb_fetchNextPage2() {
-        Thumb.fetchNextPage = function() {}; // no-op (avoid parallel request)
+        Thumb.fetchNextPage = no_op; // avoid parallel request
         page = mode.new_illust ? Math.ceil(Thumb.images.length / 20) + 1 : page + 1;
         Thumb.fetch(page, function(html) {
-          Thumb.fetchNextPage = Thumb_fetchNextPage2; // set back
           var status = Thumb.addIllusts(html);
-          //log(JSON.stringify(status));
-          if (!status.success || !status.isnew) {
-            Thumb.fetchNextPage = function() {}; // no-op
+          log(JSON.stringify(status));
+          if (!status.success || status.empty) {
+            Thumb.fetchNextPage = no_op; // no-op
+          } else if (status.allold) {
+            Thumb.fetchNextPage = no_op;
+            setTimeout(function() { // no new request for 15 sec
+              Thumb.fetchNextPage = Thumb_fetchNextPage2;
+            }, 15*1000);
+          } else {
+            Thumb.fetchNextPage = Thumb_fetchNextPage2;
           }
         });
       };
@@ -254,15 +261,19 @@
           return {url: m[3], title: m[5], titleAndAuthor: m[4], misc1: '<div>' + m[1] + (m[2] ? '('+m[2]+')' : '') + '</div>', misc2: '<div>' + m[6] + '<br />' + m[7] + '</div>'};
         };
       }
-      var m, f, allnew = true, isnew = false;
+      var m, f, allnew = true, empty = true, allold = true;
       while((m = r.exec(html)) && (f = format(m))) {
-        isnew = true;
-        if (!Thumb.add(f.url, f.title, f.titleAndAuthor, f.misc1, f.misc2)) allnew = false;
+        empty = false;
+        if (Thumb.add(f.url, f.title, f.titleAndAuthor, f.misc1, f.misc2)) { // not dup
+          allold = false;
+        } else { // dup
+          allnew = false;
+        }
       }
-      if (!isnew) allnew = false;
+      if (empty) allnew = false;
       Thumb.resetScrollbar();
       Thumb.hideFarImg();
-      return {success: true, isnew: isnew, allnew: allnew};
+      return {success: true, empty: empty, allnew: allnew, allold: allold};
     };
     Thumb.add = function Thumb_add(url, title, titleAndAuthor, misc1, misc2) { // returns false if dup
       if (!titleAndAuthor) titleAndAuthor = title;
