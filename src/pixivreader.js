@@ -97,7 +97,7 @@
       '.pixivreader .rightcol .showcase .item .itembody img {display:block; margin: 5px auto; max-width: 90%; max-height: 650px; background-size: 100%; border: solid #d0d0d0 1px; background-color:white;}',
       '.pixivreader .rightcol .showcase .item.large .itembody img {max-height: none;}',
       '.pixivreader .shade {position:absolute; left:0; top:0; width: 100%; height: 100%; background-color: black; opacity: 0.5; z-index: 1000;}',
-      '.pixivreader .bookmarker {position:absolute; z-index: 2000; background-color: white; width: 680px; height: 450px; margin-left: -340px; margin-top: -225px; left: 50%; top: 50%; }',
+      '.pixivreader .bookmarker {position:absolute; z-index: 2000; background-color: white; width: 680px; margin-left: -340px; margin-top: -250px; left: 50%; top: 50%; }',
       '.pixivreader .bookmarker form {padding: 10px;}',
       // from pixiv.js (modified)
       '.pixivreader .bookmarker .bookmain_title{padding:4px;}',
