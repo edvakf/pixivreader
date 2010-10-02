@@ -520,6 +520,7 @@
       if (item.className.indexOf('manga') >= 0) {
         if (item.className.indexOf('large') >= 0) {
           item.className = item.className.replace(' large', '');
+          Showcase.adjustBottom(item);
         } else {
           item.className += ' large';
         }
@@ -529,13 +530,17 @@
       var src = img.src;
       if (item.className.indexOf('large') >= 0) {
         item.className = item.className.replace(' large', '');
-        gradualLoadImg(img, src, src.replace(/(\.\w+)$/, '_m$1'));
+        gradualLoadImg(img, src, src.replace(/(\.\w+)$/, '_m$1'),
+          function onload() {
+            Showcase.adjustBottom(item);
+          }
+        );
       } else {
         item.className += ' large';
         gradualLoadImg(img, src, src.replace(/_m(\.\w+)$/, '$1'),
           function onload() {
             Showcase.focus(item);
-          }, 
+          },
           function onerror() {
             item.className = item.className.replace(' large', '');
           }
@@ -555,6 +560,7 @@
         while(s = img.nextSibling) {
           s.parentNode.removeChild(s);
         }
+        Showcase.adjustBottom(item);
       }
       if (item.className.indexOf('manga') >= 0) {
         quitManga();
@@ -590,6 +596,16 @@
             quitManga();
           }
         );
+      }
+    };
+    Showcase.adjustBottom = function Showcase_adjustBottom(item) {
+      var rect = item.getBoundingClientRect();
+      if (rect.bottom < document.documentElement.clientHeight - 5) {
+        rightcol.scrollTop -= (document.documentElement.clientHeight - 5 - rect.bottom);
+        rect = item.getBoundingClientRect();
+        if (rect.top > 5) {
+          rightcol.scrollTop += (rect.top - 5);
+        }
       }
     };
     Showcase.finishBookmark = function Showcase_finishBookmark() {
