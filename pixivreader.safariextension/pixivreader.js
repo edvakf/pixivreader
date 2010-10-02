@@ -99,7 +99,6 @@
       '.pixivreader .shade {position:absolute; left:0; top:0; width: 100%; height: 100%; background-color: black; opacity: 0.5; z-index: 1000;}',
       '.pixivreader .bookmarker {position:absolute; z-index: 2000; background-color: white; width: 680px; height: 450px; margin-left: -340px; margin-top: -225px; left: 50%; top: 50%; }',
       '.pixivreader .bookmarker form {padding: 10px;}',
-      '.pixivreader .bookmarker iframe {position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background-color: white;}',
       // from pixiv.js (modified)
       '.pixivreader .bookmarker .bookmain_title{padding:4px;}',
       '.pixivreader .bookmarker .bookmain_title_img{text-align:left;}',
@@ -622,30 +621,26 @@
             bm.querySelector('form').addEventListener('submit', function onsubmit(e) {
               e.preventDefault();
               var form = e.target;
-              form.removeEventListener('submit', onsubmit, false);
-              var iframe = document.createElement('iframe');
-              iframe.className = 'bookmark_add';
-              document.querySelector('.pixivreader').appendChild(iframe);
-              iframe.name = 'pixivreader_bookmark_add_' + Math.floor(Math.random() * 100000);
-              form.target = iframe.name;
-              HTMLFormElement.prototype.submit.call(form); // form.submit() doesn't work here because there are <input name="submit">
-              var onmessage = function(e) {
-                if (e.origin !== 'http://www.pixiv.net' || e.data.name !== iframe.name || e.data.message !== 'bookmark_success') return;
-                window.removeEventListener('message', onmessage, false);
-                clearTimeout(timer);
-                iframe.parentNode.removeChild(iframe);
-                Showcase.finishBookmark();
-              };
-              var timer = setTimeout(function() {
-                window.removeEventListener('message', onmessage, false);
-                clearTimeout(timer);
-                iframe.parentNode.removeChild(iframe);
-                forEach(form.querySelectorAll('input[type="submit"]'), function(button) {
-                  button.disabled = true;
-                  button.value = '10秒間応答がありません';
-                });
-              }, 10000);
-              window.addEventListener('message', onmessage, false);
+              forEach(form.querySelectorAll('input[type="submit"]'), function(button) {
+                button.disabled = true;
+              });
+
+              var xhr = new XMLHttpRequest;
+              xhr.open('POST', form.action, true);
+              xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
+              xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                  if (xhr.status === 200) {
+                    Showcase.finishBookmark();
+                  } else {
+                    forEach(form.querySelectorAll('input[type="submit"]'), function(button) {
+                      button.disabled = true;
+                      button.value = '失敗しました';
+                    });
+                  }
+                }
+              }
+              xhr.send(form_to_query_string(form));
             }, false);
 
             // focus on comment field
@@ -829,6 +824,24 @@
       //origin.scrollLeft = x;
       origin.scrollTop = y - 5;
     }
+  }
+
+  function form_to_query_string(form) {
+    var qry = [];
+    forEach(form.querySelectorAll('*[name]'), function(input) {// this is no way complete, but sufficient for this application
+      if (input.name && input.value) {
+        // does not check textarea, button, etc.
+        switch (input.type) {
+          case 'radio': if (input.disabled) break;
+          case 'checkbox': if (!input.ckecked) break;
+          //case 'hidden':
+          //case 'text':
+          //case '':
+          default: qry.push(encodeURIComponent(input.name) + '=' + encodeURIComponent(input.value));
+        }
+      }
+    });
+    return qry.join('&');
   }
 
   function log(msg) {
