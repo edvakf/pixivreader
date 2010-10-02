@@ -273,6 +273,12 @@
       li.innerHTML = (misc1||'') + '<a href="member_illust.php?mode=medium&illust_id='+id+'">' +
                      '<img data-src="'+url+'" alt="'+titleAndAuthor+'" title="'+titleAndAuthor+'" border="0">'+title+'</a>' + (misc2||'');
       leftcol.querySelector('ul').appendChild(li);
+      var img = li.querySelector('img');
+      img.onload = function() {
+        img.setAttribute('height', img.height);
+        img.setAttribute('width', img.width);
+        img.onload = null;
+      };
       Thumb.images.push(li);
       Thumb.ids[id] = li;
       return true;
