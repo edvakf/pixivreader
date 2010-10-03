@@ -8,6 +8,7 @@
 // @include     http://www.pixiv.net/bookmark_new_illust.php*
 // @include     http://www.pixiv.net/ranking.php*
 // @include     http://www.pixiv.net/ranking_log.php*
+// @include     http://www.pixiv.net/member_illust.php*
 // @include     http://www.pixiv.net/bookmark.php*
 // @include     http://www.pixiv.net/bookmark_add.php*
 // @compatible  Opera, Chrome (as UserJS and extension), Safari (as extension)
@@ -36,18 +37,26 @@
 (function () {
   var debug = false;
   var pathname = location.pathname;
+
+  if (pathname.indexOf('/bookmark') === 0 && window.name.indexOf('pixivreader_bookmark_add_') === 0) {
+    window.parent.postMessage({name:window.name, message:'bookmark_success'}, 'http://www.pixiv.net');
+    return;
+  }
+
   var mode = {
     new_illust : (pathname.indexOf('/new_illust.php') === 0),
     search : (pathname.indexOf('/search.php') === 0) || (pathname.indexOf('/tags.php') === 0) || (pathname.indexOf('/bookmark_new_illust.php') === 0),
     ranking : (pathname.indexOf('/ranking.php') === 0) || (pathname.indexOf('/ranking_log.php') === 0),
+    bookmark : (pathname.indexOf('/bookmark.php') === 0) || (pathname.indexOf('/member_illust.php') === 0),
   };
 
-  if (/http:\/\/www\.pixiv\.net\/((bookmark_)?new_illust|search|tags|ranking(_log)?)\.php/.test(location.href)) {
+  if (/\/((bookmark_)?new_illust|search|tags|ranking(_log)?|bookmark)\.php/.test(pathname) || 
+      (/\/member_illust\.php/.test(pathname) && !/mode=(medium|big|manga)/.test(location.search))) {
     if (location.href.indexOf('pixivreader') >= 0) {
       document.documentElement.style.display = 'none';
       if (document.readyState !== 'complete') { // Opera 10.10 is 'interactive'->'complete', but Opera 10.5 and other browsers are 'loading'->'complete' (per spec)
         document.addEventListener('DOMContentLoaded', init, false);
-      } else {
+      } else { // Greasemonkey
         init();
       }
     } else {
@@ -57,8 +66,6 @@
         init_readerToggle();
       }
     }
-  } else if (pathname.indexOf('/bookmark') === 0 && window.name.indexOf('pixivreader_bookmark_add_') === 0) {
-    window.parent.postMessage({name:window.name, message:'bookmark_success'}, 'http://www.pixiv.net');
   }
 
   function init() {
@@ -142,6 +149,20 @@
         li.appendChild(misc2);
         li.querySelector('a').appendChild(document.createTextNode(r.querySelector('.f16b a').textContent));
         ul.appendChild(li);
+      });
+    } else if (mode.bookmark) {
+      var leftcol = document.querySelector('.display_works').cloneNode(true);
+      forEach(leftcol.querySelectorAll('li'), function(li) {
+        var e;
+        if ((e = li.firstChild) instanceof HTMLInputElement) {
+          li.removeChild(e);
+        }
+        if (e = li.querySelector('a label')) {
+          e.parentNode.replaceChild(e.firstChild, e); // firstChild is a text node
+        }
+        if ((e = li.querySelector('.edit_link')) && (e = e.parentNode) instanceof HTMLAnchorElement) {
+          e.parentNode.removeChild(e);
+        }
       });
     }
     leftcol.className = 'leftcol';
@@ -244,6 +265,8 @@
           html = html.match(/<div class="search_a2_result[\s\S]*?<\/div>/).toString();
         } else if (mode.ranking) {
           html = html.match(/<div class="rankingCenter">[\s\S]*?<div class="rankingRight">/).toString();
+        } else if (mode.bookmark) {
+          html = html.match(/<div class="display_works[\s\S]*?<div class="pager_ul">/).toString();
         }
       } catch(e) {
         log(e);
@@ -258,6 +281,11 @@
         var r = /<div class="rankingZone">[\s\S]*?<span class="f16b">(\d+位)<\/span>(?:<br \/>)?(前日\d+位)?[\s\S]*?<li class="r_left_img"><a href=".*?"><img src="(.*?)" alt="(.*?)" title=".*?" \/><\/a><\/li>[\s\S]*?<span class="f16b"><a href=".*?">(.*?)<\/a>[\s\S]*?(評価回数：\d+)　(スコア：\d+)[\s\S]*?<div class="clear"><\/div>/g;
         var format = function format(m) {
           return {url: m[3], title: m[5], titleAndAuthor: m[4], misc1: '<div>' + m[1] + (m[2] ? '('+m[2]+')' : '') + '</div>', misc2: '<div>' + m[6] + '<br />' + m[7] + '</div>'};
+        };
+      } else if (mode.bookmark) {
+        var r = /<li.*?>(?:<input.*?>)?<a href=".*?"><img src="(.*?)" alt="(.*?)".*?>(?:<label.*?>)?(.*?)(?:<\/label>)?<\/a>(.*?)(?:<br \/><a href="bookmark_add\.php.*?"><span class="edit_link">編集<\/span><\/a>)?<\/li>/g;
+        var format = function format(m) { // img src, title (and maybe author), title, misc2
+          return {url: m[1], title: m[3], titleAndAuthor: m[2], misc2: m[4]};
         };
       }
       var m, f, allnew = true, empty = true, allold = true;
