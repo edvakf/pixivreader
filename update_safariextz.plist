@@ -10,9 +10,9 @@
        <key>Developer Identifier</key>
        <string>748279E8YF</string>
        <key>CFBundleVersion</key>
-       <string>1.0</string>
+       <string>1.2</string>
        <key>CFBundleShortVersionString</key>
-       <string>1</string>
+       <string>0</string>
        <key>URL</key>
        <string>http://atsushi-takayama.com/pixivreader/pixivreader.safariextz</string>
      </dict>
