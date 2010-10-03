@@ -38,11 +38,6 @@
   var debug = false;
   var pathname = location.pathname;
 
-  if (pathname.indexOf('/bookmark') === 0 && window.name.indexOf('pixivreader_bookmark_add_') === 0) {
-    window.parent.postMessage({name:window.name, message:'bookmark_success'}, 'http://www.pixiv.net');
-    return;
-  }
-
   var mode = {
     new_illust : (pathname.indexOf('/new_illust.php') === 0),
     search : (pathname.indexOf('/search.php') === 0) || (pathname.indexOf('/tags.php') === 0) || (pathname.indexOf('/bookmark_new_illust.php') === 0),
