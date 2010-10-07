@@ -10,7 +10,6 @@
 // @include     http://www.pixiv.net/ranking_log.php*
 // @include     http://www.pixiv.net/member_illust.php*
 // @include     http://www.pixiv.net/bookmark.php*
-// @include     http://www.pixiv.net/bookmark_add.php*
 // @compatible  Opera, Chrome (as UserJS and extension), Safari (as extension)
 // @licence     Public Domain
 // ==/UserScript==
@@ -29,13 +28,14 @@
 // m 又は shift+space : 右ペイン、上へスクロール
 // l : 右ペイン、さらに大きな画像を表示（縦長の漫画で使うといい）
 // h : 右ペイン、漫画を表示
-// b : 右ペインの画像をブックマーク
+// b : 右ペ;
 // c 又は esc : ブックマーク編集終了 (Chrome と Safari では esc は使えません)
 // u : 右ペイン、画像を消す
 // o : 右ペイン、画像の元ページを開く
 
 (function () {
   var debug = false;
+  var location = window.location, XMLHttpRequest = window.XMLHttpRequest;
   var pathname = location.pathname;
 
   var mode = {
@@ -149,13 +149,13 @@
       var leftcol = document.querySelector('.display_works').cloneNode(true);
       forEach(leftcol.querySelectorAll('li'), function(li) {
         var e;
-        if ((e = li.firstChild) instanceof HTMLInputElement) {
+        if ((e = li.firstChild) instanceof window.HTMLInputElement) {
           li.removeChild(e);
         }
         if (e = li.querySelector('a label')) {
           e.parentNode.replaceChild(e.firstChild, e); // firstChild is a text node
         }
-        if ((e = li.querySelector('.edit_link')) && (e = e.parentNode) instanceof HTMLAnchorElement) {
+        if ((e = li.querySelector('.edit_link')) && (e = e.parentNode) instanceof window.HTMLAnchorElement) {
           e.parentNode.removeChild(e);
         }
       });
@@ -190,11 +190,11 @@
       Thumb.images.push(li);
     });
     Thumb.images[0].className += ' focused';
-    setTimeout(function() {// because methods are defined below
+    window.setTimeout(function() {// because methods are defined below
       Thumb.resetScrollbar();
       if (mode.new_illust) {
         Thumb.autoRenew(2, true);
-        setInterval(Thumb.autoRenew, 60000);
+        window.setInterval(Thumb.autoRenew, 60000);
       }
     }, 10);
 
@@ -203,7 +203,7 @@
       if (!p) p = 1;
       var maxpage = 4;
       function recursive(page) {
-        setTimeout(function() {
+        window.setTimeout(function() {
           Thumb.fetch(page, function(html) {
             var status = Thumb.addIllusts(html);
             if (status.success && !status.empty && (status.allnew || dontStop) && page < maxpage) {
@@ -232,7 +232,7 @@
             Thumb.fetchNextPage = no_op; // no-op
           } else if (status.allold) {
             Thumb.fetchNextPage = no_op;
-            setTimeout(function() { // no new request for 15 sec
+            window.setTimeout(function() { // no new request for 15 sec
               Thumb.fetchNextPage = Thumb_fetchNextPage2;
             }, 15*1000);
           } else {
@@ -510,7 +510,7 @@
       if (Showcase.images.length === 0) return;
       var f = document.querySelector('.rightcol .focused');
       if (f) f.className = f.className.replace(' focused', '');
-      if (n instanceof HTMLElement) {
+      if (n instanceof window.HTMLElement) {
         n.className += ' focused';
         Showcase.pos = indexOf(document.querySelectorAll('.rightcol .item'), n);
       } else {
@@ -683,7 +683,7 @@
             }, false);
 
             // focus on comment field
-            setTimeout(function() {
+            window.setTimeout(function() {
               var comment = document.getElementById('comment');
               comment.focus();
             }, 10);
@@ -728,7 +728,7 @@
     window.addEventListener('keypress', function(e) {
       var a = document.activeElement;
       var keyCode = (e.keyCode || e.charCode || e.which) + 1000 * e.shiftKey + 10000 * e.ctrlKey + 100000 * e.altKey + 1000000 * e.metaKey;
-      if (keyCode < 10000 && (a instanceof HTMLTextAreaElement || (a instanceof HTMLInputElement && (!a.type || a.type === 'text')))) return;
+      if (keyCode < 10000 && (a instanceof window.HTMLTextAreaElement || (a instanceof window.HTMLInputElement && (!a.type || a.type === 'text')))) return;
       if (keys.hasOwnProperty(keyCode)) {
         e.preventDefault();
         keys[keyCode]();
@@ -814,7 +814,7 @@
     img2.style.backgroundImage = 'url('+small+')';
     function callback() {
       img2.style.visibility = 'visible';
-      clearInterval(timer);
+      window.clearInterval(timer);
       img2.parentNode.removeChild(img2);
       img.parentNode.replaceChild(img2, img);
       if (onload) onload(img);
@@ -823,20 +823,20 @@
     var useNatural = ('naturalHeight' in img); // true for safari, chrome, firefox
     var w = img2.width;
     var n = 0;
-    var timer = setInterval(function() {
+    var timer = window.setInterval(function() {
       if ((useNatural && img2.naturalHeight > 0 && img2.naturalWidth > 0) || (w !== 0 && img2.width !== w)) {
         callback();
         img2.onload = function() {img.style.backgroundImage = 'none';};
       }
       if (w === 0) w = img2.width;
-      if (++n > 30) clearInterval(timer);
+      if (++n > 30) window.clearInterval(timer);
     }, 100);
     img2.onload = function() {
       callback();
       img2.style.backgroundImage = 'none';
     };
     img2.onerror = function() {
-      clearInterval(timer);
+      window.clearInterval(timer);
       img.src = small;
       img2.parentNode.removeChild(img2);
       img2.onload = img2.onerror = null;
@@ -885,8 +885,9 @@
 
   function log(msg) {
     if (!debug) return;
-    if (window.opera) opera.postError.call(opera, Array.prototype.slice.call(arguments));
-    else console.log.apply(console, Array.prototype.slice.call(arguments));
+    //if (window.opera) opera.postError.call(opera, Array.prototype.slice.call(arguments));
+    //else 
+    console.log.apply(console, Array.prototype.slice.call(arguments));
   }
 
 })();
