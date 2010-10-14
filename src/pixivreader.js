@@ -781,7 +781,7 @@
              href.replace('?', '?pixivreader&') :
              href + '?pixivreader';
              box.innerHTML = '<a href="' + href + '" style="display:block;position:absolute;top:0;left:0;height:12px;width:12px;opacity:0.5;" title="Toggle pixivreader">'+
-                             '<img src="/favicon.ico" border="0" width="12" height="12" alt="Toggle pixivreader"></a>';
+                             '<img src="/favicon.ico" border="0" width="12" height="12" alt="Toggle pixivreader" style="display:block;position:absolute;top:0;left:0;height:12px;width:12px;"></a>';
     document.body.appendChild(box);
   }
 
