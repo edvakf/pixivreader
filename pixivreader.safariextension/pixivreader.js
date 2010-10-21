@@ -28,10 +28,11 @@
 // m 又は shift+space : 右ペイン、上へスクロール
 // l : 右ペイン、さらに大きな画像を表示（縦長の漫画で使うといい）
 // h : 右ペイン、漫画を表示
-// b : 右ペ;
+// b : 右ペインの画像をブックマーク
 // c 又は esc : ブックマーク編集終了 (Chrome と Safari では esc は使えません)
 // u : 右ペイン、画像を消す
 // o : 右ペイン、画像の元ページを開く
+// ? (shift+/) : ヘルプを表示
 
 (function () {
   var debug = false;
@@ -99,27 +100,31 @@
       '.pixivreader .rightcol .showcase .item .itembody img {display:block; margin: 5px auto; max-width: 90%; max-height: 650px; background-size: 100%; border: solid #d0d0d0 1px; background-color:white;}',
       '.pixivreader .rightcol .showcase .item.large .itembody img {max-height: none;}',
       '.pixivreader .shade {position:absolute; left:0; top:0; width: 100%; height: 100%; background-color: black; opacity: 0.5; z-index: 1000;}',
-      '.pixivreader .bookmarker {position:absolute; z-index: 2000; background-color: white; width: 680px; margin-left: -340px; margin-top: -250px; left: 50%; top: 50%; }',
-      '.pixivreader .bookmarker form {padding: 10px;}',
+      '.pixivreader .lightbox {position:absolute; z-index: 2000; background-color: white; width: 680px; margin-left: -340px; margin-top: -250px; left: 50%; top: 50%; }',
+      '.pixivreader .lightbox .shortcuts{width: 100%; border: black solid 1px;}',
+      '.pixivreader .lightbox .shortcuts thead{border-bottom: black solid 1px; background-color:#eee;}',
+      '.pixivreader .lightbox .shortcuts th{padding-left: 0.5em; font-weight:bold !important;}',
+      '.pixivreader .lightbox .shortcuts td{padding-left: 0.5em;}',
+      '.pixivreader .lightbox form {padding: 10px;}',
       // from pixiv.js (modified)
-      '.pixivreader .bookmarker .bookmain_title{padding:4px;}',
-      '.pixivreader .bookmarker .bookmain_title_img{text-align:left;}',
-      '.pixivreader .bookmarker .box_main_sender{padding-right:0px;padding-bottom:0px;}',
-      '.pixivreader .bookmarker .box_one_body{padding:0px; max-width: 100%}',
-      '.pixivreader .bookmarker .box_one_body > dl{padding:4px 4px 0px 4px;margin:0px;line-height:24px;}',
-      '.pixivreader .bookmarker .box_one_body > dl:last-child{padding:4px;}',
-      '.pixivreader .bookmarker .box_one_body > dl > dd{margin-top:-24px;}',
-      '.pixivreader .bookmarker .box_one_body + div{display:none;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag{margin:4px;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag + .bookmark_recommend_tag{margin-top:16px;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag > span:first-child{display:none;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag > br{display:none;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag > ul{padding:0px;margin:0px;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag > ul + ul{margin-top:4px;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag > ul > li{padding:2px;margin-right:4px;}',
-      '.pixivreader .bookmarker .bookmark_recommend_tag > ul > li[selected]{border:2px solid #56E655;padding:0px;}',
-      '.pixivreader .bookmarker .bookmark_bottom{padding-bottom:4px;}',
-      '.pixivreader .bookmarker .bookmark_bottom input{margin:0px;}',
+      '.pixivreader .lightbox .bookmain_title{padding:4px;}',
+      '.pixivreader .lightbox .bookmain_title_img{text-align:left;}',
+      '.pixivreader .lightbox .box_main_sender{padding-right:0px;padding-bottom:0px;}',
+      '.pixivreader .lightbox .box_one_body{padding:0px; max-width: 100%}',
+      '.pixivreader .lightbox .box_one_body > dl{padding:4px 4px 0px 4px;margin:0px;line-height:24px;}',
+      '.pixivreader .lightbox .box_one_body > dl:last-child{padding:4px;}',
+      '.pixivreader .lightbox .box_one_body > dl > dd{margin-top:-24px;}',
+      '.pixivreader .lightbox .box_one_body + div{display:none;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag{margin:4px;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag + .bookmark_recommend_tag{margin-top:16px;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag > span:first-child{display:none;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag > br{display:none;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag > ul{padding:0px;margin:0px;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag > ul + ul{margin-top:4px;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag > ul > li{padding:2px;margin-right:4px;}',
+      '.pixivreader .lightbox .bookmark_recommend_tag > ul > li[selected]{border:2px solid #56E655;padding:0px;}',
+      '.pixivreader .lightbox .bookmark_bottom{padding-bottom:4px;}',
+      '.pixivreader .lightbox .bookmark_bottom input{margin:0px;}',
     ].join('\n'));
 
     // make viewer
@@ -631,24 +636,10 @@
         }
       }
     };
-    Showcase.finishBookmark = function Showcase_finishBookmark() {
-      var bm = document.querySelector('.pixivreader .bookmarker');
-      var shade = document.querySelector('.pixivreader .shade');
-      if (bm) bm.parentNode.removeChild(bm);
-      if (shade) shade.parentNode.removeChild(shade);
-    };
     Showcase.bookmarkCurrent = function Showcase_bookmarkCurrent() {
       if (Showcase.images.length === 0) return;
-      Showcase.finishBookmark();
-
-      var shade = document.createElement('div');
-      shade.className = 'shade';
-      shade.onclick = Showcase.finishBookmark;
-      document.querySelector('.pixivreader').appendChild(shade);
-      var bm = document.createElement('div');
-      bm.className = 'bookmarker';
-      document.querySelector('.pixivreader').appendChild(bm);
-
+      LightBox.hide();
+      LightBox.show();
       var current = Showcase.images[Showcase.pos];
       var id = current.querySelector('h2 a').href.match(/illust_id=(\d+)$/)[1];
       var xhr = new XMLHttpRequest;
@@ -656,6 +647,8 @@
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
+            var bm = LightBox.get();
+            if (!bm) return;
             bm.innerHTML = xhr.responseText.match(/<form[^>]*action="bookmark_add.php"[\S\s]*?<\/form>/);
             bm.querySelector('form').addEventListener('submit', function onsubmit(e) {
               e.preventDefault();
@@ -670,7 +663,7 @@
               xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                   if (xhr.status === 200) {
-                    Showcase.finishBookmark();
+                    LightBox.hide();
                   } else {
                     forEach(form.querySelectorAll('input[type="submit"]'), function(button) {
                       button.disabled = true;
@@ -696,7 +689,7 @@
                             "var arr       = value.split(/\s+|　+/);" +
                             "tag_chk(arr);";
           } else { // error
-            Showcase.finishBookmark();
+            LightBox.hide();
           }
         }
       };
@@ -705,6 +698,33 @@
   }
 
   function init_events() { // shortcut and mouse
+    function show_shortcuts() {
+      LightBox.show();
+      var box = LightBox.get();
+      box.innerHTML = [
+        '<table class="shortcuts">',
+        '<thead><tr><th>ショートカットキー</th><th>動作</th></tr></thead>',
+        '<tbody>',
+        '<tr><td>s</td><td>左ペイン、一つ下へ</td></tr>',
+        '<tr><td>a</td><td>左ペイン、一つ上へ</td></tr>',
+        '<tr><td>i</td><td>大きな画像を右ペインに表示</td></tr>',
+        '<tr><td>j</td><td>右ペイン、一つ下へ</td></tr>',
+        '<tr><td>k</td><td>右ペイン、一つ上へ</td></tr>',
+        '<tr><td>n 又は space</td><td>右ペイン、下へスクロール</td></tr>',
+        '<tr><td>m 又は shift+space</td><td>右ペイン、上へスクロール</td></tr>',
+        '<tr><td>l</td><td>右ペイン、さらに大きな画像を表示（縦長の漫画で使うといい）</td></tr>',
+        '<tr><td>h</td><td>右ペイン、漫画を表示</td></tr>',
+        '<tr><td>b</td><td>右ペインの画像をブックマーク</td></tr>',
+        '<tr><td>c 又は esc</td><td>ブックマーク編集終了・ヘルプを終了 (Chrome と Safari では esc は使えません)</td></tr>',
+        '<tr><td>u</td><td>右ペイン、画像を消す</td></tr>',
+        '<tr><td>o</td><td>右ペイン、画像の元ページを開く</td></tr>',
+        '<tr><td>? (shift+/)</td><td>ヘルプを表示</td></tr>',
+        '<tr><td>(ショートカットなし)</td><td>pixivreader オン・オフ (<a href="javascript:(function(a){if(/http:\\/\\/www\\.pixiv\\.net/.test(location)&&(a=document.querySelector(&apos;a[title=&quot;Toggle pixivreader&quot;]&apos;)))a.click()}())">ブックマークレット</a>でやってください)</td></tr>',
+        '</tbody>',
+        '</table>',
+      ].join('\n');
+    }
+
     // keyboard handling
     var keys = {
       115 : Thumb.next, // s
@@ -719,10 +739,12 @@
       108 : Showcase.toggleLarge, // l
       104 : Showcase.toggleManga, // h
       98 : Showcase.bookmarkCurrent, // b
-      99 : Showcase.finishBookmark, // c
-      27 : Showcase.finishBookmark, // esc
+      99 : LightBox.hide, // c
+      27 : LightBox.hide, // esc
       117 : Showcase.remove, // u
       111 : Showcase.open, // o
+      63 : show_shortcuts, // ?
+      1063 : show_shortcuts, // ? (shift+/)
     };
 
     window.addEventListener('keypress', function(e) {
@@ -785,6 +807,27 @@
     document.body.appendChild(box);
   }
 
+  // lightbox
+  LightBox = {
+    show : function LightBox_show() {
+      var shade = document.createElement('div');
+      shade.className = 'shade';
+      shade.onclick = Showcase.finishBookmark;
+      document.querySelector('.pixivreader').appendChild(shade);
+      var bm = document.createElement('div');
+      bm.className = 'lightbox';
+      document.querySelector('.pixivreader').appendChild(bm);
+    },
+    hide : function LightBox_hide() {
+      var bm = LightBox.get();
+      var shade = document.querySelector('.pixivreader .shade');
+      if (bm) bm.parentNode.removeChild(bm);
+      if (shade) shade.parentNode.removeChild(shade);
+    },
+    get : function LightBox_get() {
+      return document.querySelector('.pixivreader .lightbox');
+    }
+  };
 
 
 
@@ -889,5 +932,4 @@
     //else 
     console.log.apply(console, Array.prototype.slice.call(arguments));
   }
-
 })();
