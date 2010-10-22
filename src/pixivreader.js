@@ -638,7 +638,6 @@
     };
     Showcase.bookmarkCurrent = function Showcase_bookmarkCurrent() {
       if (Showcase.images.length === 0) return;
-      LightBox.hide();
       LightBox.show();
       var current = Showcase.images[Showcase.pos];
       var id = current.querySelector('h2 a').href.match(/illust_id=(\d+)$/)[1];
@@ -810,6 +809,7 @@
   // lightbox
   LightBox = {
     show : function LightBox_show() {
+      LightBox.hide();
       var shade = document.createElement('div');
       shade.className = 'shade';
       shade.onclick = LightBox.hide;
