@@ -29,7 +29,7 @@
 // l : 右ペイン、さらに大きな画像を表示（縦長の漫画で使うといい）
 // h : 右ペイン、漫画を表示
 // b : 右ペインの画像をブックマーク
-// c 又は esc : ブックマーク編集終了 (Chrome と Safari では esc は使えません)
+// c 又は esc : ブックマーク編集終了・ヘルプを終了 (Chrome と Safari では esc は使えません)
 // u : 右ペイン、画像を消す
 // o : 右ペイン、画像の元ページを開く
 // ? (shift+/) : ヘルプを表示
@@ -812,7 +812,7 @@
     show : function LightBox_show() {
       var shade = document.createElement('div');
       shade.className = 'shade';
-      shade.onclick = Showcase.finishBookmark;
+      shade.onclick = LightBox.hide;
       document.querySelector('.pixivreader').appendChild(shade);
       var bm = document.createElement('div');
       bm.className = 'lightbox';
