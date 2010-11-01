@@ -680,13 +680,15 @@
               comment.focus();
             }, 10);
 
-            // for bookmarks (see bookmark_add_v4.js?20100727)
-            location.href = "javascript:" + 
-                            "alltags       = getAllTags();" + 
-                            "var input_tag = $('input_tag');" +
-                            "var value     = input_tag.value;" +
-                            "var arr       = value.split(/\s+|　+/);" +
-                            "tag_chk(arr);";
+            // for bookmarks (see bookmark_add_v4.js?20101028)
+            location.href = "javascript:(function(){" +
+                              "window.alltags = getAllTags();" +
+                              "var input_tag = $('#input_tag')[0];" +
+                              "var value     = input_tag.value;" +
+                              "var arr       = value.split(/\s+|　+/);" +
+                              "window.tag_chk(arr);" +
+                              "window.bookmarkTagSort.init();" +
+                            "}());"
           } else { // error
             LightBox.hide();
           }
@@ -774,17 +776,29 @@
 
   function init_externals() { // load scripts and stylesheet from pixiv
     // for bookmark
-    var s1 = document.createElement('script');
-    var s2 = document.createElement('script');
+    var sc = document.createElement('script');
     var st = document.createElement('link');
-    s1.src = 'http://source.pixiv.net/source/js/countStrlen.js?20100720';
-    s2.src = 'http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727';
+    sc.src = 'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028';
     st.rel = 'stylesheet';
     st.href = 'http://source.pixiv.net/source/css/bookmark_add.css?20100720';
     var h = document.getElementsByTagName('head')[0];
-    h.appendChild(s1);
-    h.appendChild(s2);
+    h.appendChild(sc);
     h.appendChild(st);
+    // override jQuery.fn.ready so that it won't execute the argument function immediately
+    // http://bugs.jquery.com/ticket/7366
+    if (window.jQuery) {
+      var ready = jQuery.fn.ready;
+      jQuery.fn.ready = function(fn) {
+        if (jQuery.isReady) {
+          setTimeout(function() {
+            ready.call(jQuery.fn, fn);
+          }, 10);
+          return this;
+        } else {
+          return ready.call(jQuery.fn, fn);
+        }
+      }
+    }
   }
 
   function init_readerToggle() { // create a button to toggle pixivreader
