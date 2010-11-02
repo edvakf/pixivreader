@@ -264,7 +264,7 @@
         if (mode.new_illust || mode.search) {
           html = html.match(/<div class="search_a2_result[\s\S]*?<\/div>/).toString();
         } else if (mode.ranking) {
-          html = html.match(/<div class="rankingCenter">[\s\S]*?<div class="rankingRight">/).toString();
+          html = html.match(/class="autopagerize_page_element"[\s\S]*?class="rankingPager"/).toString();
         } else if (mode.bookmark) {
           html = html.match(/<div class="display_works[\s\S]*?<div class="pager_ul">/).toString();
         }
