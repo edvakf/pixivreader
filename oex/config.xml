@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets">
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://atsushi-takayama.com/pixivreader" version="1.3.7">
   <name>pixivreader</name>
-  <description>Adds Google Reader like style and shortcuts to www.pixiv.net</description>
+  <description xml:lang="en">Adds Google Reader like style and shortcuts to www.pixiv.net</description>
+  <description xml:lang="ja">pixiv をキーボードでサクサク見るための拡張です</description>
   <author href="http://d.hatena.ne.jp/edvakf/">edvakf</author>
   <icon width="64" height="64" src="icons/icon64.png" />
   <icon width="18" height="18" src="icons/icon18.png" />
