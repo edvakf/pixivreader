@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets" id="http://atsushi-takayama.com/pixivreader" version="1.3.7">
+  <name xml:lang="en">pixivreader</name>
   <name xml:lang="ja">pixivreader</name>
   <description xml:lang="en">Adds Google Reader like style and shortcuts to www.pixiv.net</description>
   <description xml:lang="ja">pixiv をキーボードでサクサク見るための拡張です</description>
