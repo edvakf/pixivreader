@@ -786,7 +786,8 @@
     h.appendChild(st);
     // override jQuery.fn.ready so that it won't execute the argument function immediately
     // http://bugs.jquery.com/ticket/7366
-    if (window.jQuery) {
+    var jQuery;
+    if (jQuery = window.jQuery) {
       var ready = jQuery.fn.ready;
       jQuery.fn.ready = function(fn) {
         if (jQuery.isReady) {
