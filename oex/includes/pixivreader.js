@@ -35,7 +35,7 @@
 // ? (shift+/) : ヘルプを表示
 
 (function () {
-  var debug = false;
+  var debug = true;
   var location = window.location, XMLHttpRequest = window.XMLHttpRequest;
   var pathname = location.pathname;
 
@@ -153,6 +153,10 @@
     } else if (mode.bookmark) {
       var leftcol = document.querySelector('.display_works').cloneNode(true);
       forEach(leftcol.querySelectorAll('li'), function(li) {
+        if (li.querySelector('img[src="http://source.pixiv.net/source/images/limit_unknown_s.png"]')) { // if deleted
+          li.parentNode.removeChild(li);
+          return;
+        }
         var e;
         if ((e = li.firstChild) instanceof window.HTMLInputElement) {
           li.removeChild(e);
@@ -190,7 +194,9 @@
     forEach(leftcol.querySelectorAll('li'), function(li) {
       var img = li.querySelector('img');
       img.setAttribute('data-src', img.getAttribute('src'));
-      var id = img.src.match(/\/(\d+)_s\.\w+$/)[1];
+      try {
+        var id = img.src.match(/\/(\d+)_s\.\w+$/)[1];
+      } catch(e) {}
       Thumb.ids[id] = li;
       Thumb.images.push(li);
     });
@@ -278,7 +284,7 @@
           return {url: m[1], title: m[3], titleAndAuthor: m[2], misc2: m[4]};
         };
       } else if (mode.ranking) {
-        var r = /<div class="rankingZone">[\s\S]*?<span class="f16b">(\d+位)<\/span>(?:<br \/>)?(前日\d+位)?[\s\S]*?<li class="r_left_img"><a href=".*?"><img src="(.*?)" alt="(.*?)" title=".*?" \/><\/a><\/li>[\s\S]*?<span class="f16b"><a href=".*?">(.*?)<\/a>[\s\S]*?(評価回数：\d+)　(スコア：\d+)[\s\S]*?<div class="clear"><\/div>/g;
+        var r = /<div class="rankingZone"[\s\S]+?(\d+位)[\s\S]+?(前日\d+位)?<\/li>[\s\S]+?<img src="(.*?)" alt="(.*?)" title="(.*?)"[\s\S]+?(評価回数：\d+)　(スコア：\d+)[\s\S]+?<div class="clear"><\/div>/g;
         var format = function format(m) {
           return {url: m[3], title: m[5], titleAndAuthor: m[4], misc1: '<div>' + m[1] + (m[2] ? '('+m[2]+')' : '') + '</div>', misc2: '<div>' + m[6] + '<br />' + m[7] + '</div>'};
         };
